@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concepções da Velhice: Quiz Interativo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        .option.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .option.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .option.incorrect {
+            background-color: #f44336;
+            color: white;
+        }
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .philosopher-img {
+            max-width: 200px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 50%;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #2196F3;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+        #name-input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #results-table th, #results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #results-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Concepções da Velhice: Quiz Interativo</h1>
+    <div class="container">
+        <div id="start-screen">
+            <input type="text" id="name-input" placeholder="Digite seu nome">
+            <button id="start-btn" class="btn">Iniciar Quiz</button>
+        </div>
+        <div id="quiz-screen" style="display: none;">
+            <div id="question" class="question"></div>
+            <div id="options" class="options"></div>
+            <div id="feedback" class="feedback"></div>
+            <img id="philosopher-img" class="philosopher-img" src="" alt="Filósofo">
+            <button id="next-btn" class="btn" style="display: none;">Próxima Pergunta</button>
+            <div class="progress-bar">
+                <div id="progress" class="progress"></div>
+            </div>
+        </div>
+        <div id="result-screen" style="display: none;">
+            <h2>Resultado do Quiz</h2>
+            <p id="score-display"></p>
+            <button id="restart-btn" class="btn">Reiniciar Quiz</button>
+            <button id="show-results-btn" class="btn">Mostrar Todos os Resultados</button>
+        </div>
+        <div id="all-results-screen" style="display: none;">
+            <h2>Todos os Resultados</h2>
+            <table id="results-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Pontuação</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+            <button id="back-btn" class="btn">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Qual filósofo via a velhice como uma fase de sabedoria e experiência?",
+                options: ["Cícero", "Schopenhauer", "Simone de Beauvoir"],
+                correct: 0,
+                feedback: "Cícero via a velhice como uma fase de sabedoria e experiência, valorizando o conhecimento acumulado dos idosos.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Bust_of_Cicero_%281st-cent._BC%29_-_Palazzo_Nuovo_-_Musei_Capitolini_-_Rome_2016.jpg/220px-Bust_of_Cicero_%281st-cent._BC%29_-_Palazzo_Nuovo_-_Musei_Capitolini_-_Rome_2016.jpg"
+            },
+            {
+                question: "Quem tinha uma visão mais pessimista da velhice?",
+                options: ["Cícero", "Schopenhauer", "Simone de Beauvoir"],
+                correct: 1,
+                feedback: "Schopenhauer tinha uma visão pessimista da velhice, associando-a ao declínio das capacidades físicas e mentais.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Arthur_Schopenhauer_colorized.jpg/220px-Arthur_Schopenhauer_colorized.jpg"
+            },
+            {
+                question: "Qual autor(a) propôs uma visão crítica e humanista da velhice?",
+                options: ["Cícero", "Schopenhauer", "Simone de Beauvoir"],
+                correct: 2,
+                feedback: "Simone de Beauvoir propôs uma visão crítica e humanista da velhice em sua obra 'A Velhice'.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Simone_de_Beauvoir_1955.jpg/220px-Simone_de_Beauvoir_1955.jpg"
+            },
+            {
+                question: "Segundo Cícero, o que os idosos possuem que é valioso para a sociedade?",
+                options: ["Força física", "Conhecimento acumulado", "Riqueza material"],
+                correct: 1,
+                feedback: "Cícero acreditava que os idosos possuíam conhecimento acumulado ao longo da vida, o que era valioso para a sociedade.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Bust_of_Cicero_%281st-cent._BC%29_-_Palazzo_Nuovo_-_Musei_Capitolini_-_Rome_2016.jpg/220px-Bust_of_Cicero_%281st-cent._BC%29_-_Palazzo_Nuovo_-_Musei_Capitolini_-_Rome_2016.jpg"
+            },
+            {
+                question: "De acordo com Schopenhauer, o que marca a velhice?",
+                options: ["Alegria e realização", "Sofrimento e solidão", "Sabedoria e poder"],
+                correct: 1,
+                feedback: "Schopenhauer acreditava que a velhice era marcada por sofrimento e solidão, destacando a fragilidade da vida.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Arthur_Schopenhauer_colorized.jpg/220px-Arthur_Schopenhauer_colorized.jpg"
+            },
+            {
+                question: "O que Simone de Beauvoir argumenta sobre a relação entre a sociedade e os idosos?",
+                options: ["A sociedade os valoriza excessivamente", "A sociedade os marginaliza", "A sociedade é indiferente a eles"],
+                correct: 1,
+                feedback: "Beauvoir argumenta que a sociedade marginaliza os idosos, relegando-os a um papel invisível.",
+                image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Simone_de_Beauvoir_1955.jpg/220px-Simone_de_Beauvoir_1955.jpg"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let playerName = "";
+
+        const startScreen = document.getElementById("start-screen");
+        const quizScreen = document.getElementById("quiz-screen");
+        const resultScreen = document.getElementById("result-screen");
+        const allResultsScreen = document.getElementById("all-results-screen");
+        const nameInput = document.getElementById("name-input");
+        const startBtn = document.getElementById("start-btn");
+        const questionEl = document.getElementById("question");
+        const optionsEl = document.getElementById("options");
+        const feedbackEl = document.getElementById("feedback");
+        const nextBtn = document.getElementById("next-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        const showResultsBtn = document.getElementById("show-results-btn");
+        const backBtn = document.getElementById("back-btn");
+        const philosopherImg = document.getElementById("philosopher-img");
+        const progressBar = document.getElementById("progress");
+        const scoreDisplay = document.getElementById("score-display");
+        const resultsTable = document.getElementById("results-table");
+        const resultsBody = document.getElementById("results-body");
+
+        function startQuiz() {
+            playerName = nameInput.value.trim();
+            if (playerName) {
+                startScreen.style.display = "none";
+                quizScreen.style.display = "block";
+                loadQuestion();
+            } else {
+                alert("Por favor, digite seu nome antes de começar.");
+            }
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionEl.textContent = question.question;
+            optionsEl.innerHTML = "";
+            feedbackEl.textContent = "";
+            nextBtn.style.display = "none";
+            philosopherImg.src = question.image;
+
+            question.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.classList.add("option");
+                button.addEventListener("click", () => selectOption(index));
+                optionsEl.appendChild(button);
+            });
+
+            updateProgressBar();
+        }
+
+        function selectOption(index) {
+            const question = questions[currentQuestion];
+            const options = optionsEl.getElementsByClassName("option");
+
+            for (let i = 0; i < options.length; i++) {
+                options[i].disabled = true;
+                if (i === question.correct) {
+                    options[i].classList.add("correct");
+                } else if (i === index) {
+                    options[i].classList.add("incorrect");
+                }
+            }
+
+            if (index === question.correct) {
+                score++;
+                feedbackEl.textContent = "Correto! " + question.feedback;
+            } else {
+                feedbackEl.textContent = "Incorreto. " + question.feedback;
+            }
+
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quizScreen.style.display = "none";
+            resultScreen.style.display = "block";
+            scoreDisplay.textContent = `${playerName}, você acertou ${score} de ${questions.length} perguntas!`;
+            saveResult();
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            resultScreen.style.display = "none";
+            startScreen.style.display = "block";
+            nameInput.value = "";
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function saveResult() {
+            const results = JSON.parse(localStorage.getItem("quizResults")) || [];
+            results.push({
+                name: playerName,
+                score: score,
+                date: new Date().toLocaleString()
+            });
+            localStorage.setItem("quizResults", JSON.stringify(results));
+        }
+
+        function showAllResults() {
+            resultScreen.style.display = "none";
+            allResultsScreen.style.display = "block";
+            const results = JSON.parse(localStorage.getItem("quizResults")) || [];
+            resultsBody.innerHTML = "";
+            results.forEach(result => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${result.name}</td>
+                    <td>${result.score}</td>
+                    <td>${result.date}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        }
+
+        function backToResults() {
+            allResultsScreen.style.display = "none";
+            resultScreen.style.display = "block";
+        }
+
+        startBtn.addEventListener("click", startQuiz);
+        nextBtn.addEventListener("click", nextQuestion);
+        restartBtn.addEventListener("click", restartQuiz);
+        showResultsBtn.addEventListener("click", showAllResults);
+        backBtn.addEventListener("click", backToResults);
+    </script>
+</body>
+</html>
